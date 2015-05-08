@@ -1,0 +1,32 @@
+void removeVertexDoubles(bool usePosition,bool useTextureCoords,bool useNormals){
+    map<string,unsigned int> vertMap; // used for searching already added vertex, using string as a key. Key = string of vertexPosition/vertexNormal/TextureCoords
+    vector<vertexData> verticesDup;
+    vector<unsigned int> indicesDup;
+    const u32 vtxcnt = mesh->getVerticesCount();
+    for(u32 i=0; i<vtxcnt; i++)
+    {
+        vertexData *vert = mesh->getVertexByIndex(i);
+        string unique;
+        if(usePosition)
+            unique = to_string(vert->vertPosition.x) + to_string(vert->vertPosition.y) + to_string(vert->vertPosition.z);
+        if(useTextureCoords)
+            unique += (to_string(vert->texCoord1.x) + to_string(vert->texCoord1.y));
+        if(useNormals)
+            unique += (to_string(vert->vertNormal.x) + to_string(vert->vertNormal.y) + to_string(vert->vertNormal.z));
+        
+        if(vertMap.find(unique) != vertMap.end()) // search for vertex
+        {
+            indicesDup.push_back((unsigned int)vertMap[unique]);
+        }
+        else                                       // adds new vertex
+        {
+            verticesDup.push_back(*vert);
+            vertMap.insert(std::pair<string,unsigned int>(unique,(unsigned int)verticesDup.size()-1));
+            indicesDup.push_back((unsigned int)verticesDup.size()-1);
+        }
+    }
+    mesh->verticesData.clear();
+    mesh->verticesData = verticesDup;
+    mesh->indices.clear();
+    mesh->indices = indicesDup;
+}
